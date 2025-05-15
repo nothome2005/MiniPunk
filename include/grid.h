@@ -6,7 +6,8 @@
 
 class Grid {
 public:
-    Grid(int rows, int cols, float margin, float cellSize);
+    // Исправленный конструктор: принимает marginLeft, marginTop, cellSize
+    Grid(int rows, int cols, float marginLeft, float marginTop, float cellSize);
 
     void Draw() const;
     void Update();
@@ -18,7 +19,7 @@ public:
 
 private:
     int rows, cols;
-    float margin, cellSize;
+    float marginLeft, marginTop, cellSize;
     std::vector<Button> buttons;
     std::vector<MapCell> mapCells;
     Generator* generator = nullptr;

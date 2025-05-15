@@ -12,12 +12,15 @@ struct SmokeParticle {
     float life;
 };
 
+extern float generatorSelectionOvalYOffset;
+
 // Генератор занимает 4 клетки: (4,4), (4,5), (5,4), (5,5) на 10x10
 // Положение dst всегда фиксировано в центре сетки!
 // Теперь рисует всю текстуру генератора, подгоняя под 4 клетки
 class Generator {
 public:
-    Generator(float cellSize, float margin);
+    // Исправленный конструктор: принимает cellSize, marginLeft, marginTop
+    Generator(float cellSize, float marginLeft, float marginTop);
 
     void Update();
     void Draw() const;
@@ -31,8 +34,11 @@ public:
     // Овал выделения для генератора с возможностью смещения по Y
     static void DrawSelectionOval(float x, float y, float width, float height, float offsetY = 0.0f);
 
+    // Управление смещением
+    static void SetSelectionOvalYOffset(float offset);
+
 private:
-    float cellSize, margin;
+    float cellSize, marginLeft, marginTop;
 
     // --- Дым ---
     mutable std::vector<SmokeParticle> smokeParticles;

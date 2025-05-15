@@ -10,13 +10,17 @@ int main ()
     SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
 
     InitWindow(1024, 1024, "MiniPunk");
+    SetTargetFPS(60); // Ограничение FPS
     SearchAndSetResourceDir("resources");
 
     // --- grid setup ---
     constexpr int gridSize = 10;
-    constexpr float margin = 150.0f;
-    constexpr float cellSize = (1024.0f - 2 * margin) / gridSize;
-    Grid grid(gridSize, gridSize, margin, cellSize);
+    constexpr float marginLeft = 50.0f;
+    constexpr float marginTop = 150.0f;
+    constexpr float marginRight = 250.0f;
+    constexpr float marginBottom = 150.0f;
+    constexpr float cellSize = (1024.0f - marginLeft - marginRight) / gridSize;
+    Grid grid(gridSize, gridSize, marginLeft, marginTop, cellSize);
 
     LoadResources();
 
@@ -25,7 +29,7 @@ int main ()
     grid.SetMapCells(mapCells);
 
     // --- generator ---
-    Generator generator(cellSize, margin);
+    Generator generator(cellSize, marginLeft, marginTop);
     grid.SetGenerator(&generator);
 
     while (!WindowShouldClose())

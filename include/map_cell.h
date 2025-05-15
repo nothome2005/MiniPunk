@@ -1,6 +1,7 @@
 #pragma once
 #include "raylib.h"
 #include <string>
+#include <unordered_map>
 
 enum class ResourceType {
     None,
@@ -8,6 +9,8 @@ enum class ResourceType {
     Coal,
     Stone
 };
+
+extern std::unordered_map<ResourceType, float> selectionOvalYOffset;
 
 class MapCell {
 public:
@@ -28,6 +31,9 @@ public:
 
     // ќвал выделени€ с возможностью смещени€ по Y
     static void DrawSelectionOval(float x, float y, float size, float offsetY = 0.0f);
+
+    // ”правление смещением
+    static void SetSelectionOvalYOffset(ResourceType type, float offset);
 
 private:
     ResourceType type;

@@ -4,8 +4,10 @@
 #include <algorithm>
 #include <random>
 
-Generator::Generator(float cellSize, float margin)
-    : cellSize(cellSize), margin(margin)
+float generatorSelectionOvalYOffset = 0.5f;
+
+Generator::Generator(float cellSize, float marginLeft, float marginTop)
+    : cellSize(cellSize), marginLeft(marginLeft), marginTop(marginTop)
 {}
 
 void Generator::Update() {
@@ -17,8 +19,8 @@ void Generator::UpdateSmoke() {
     smokeTimer += GetFrameTime();
     if (smokeTimer > 0.1f) {
         smokeTimer -= 0.1f;
-        float x = margin + (4.0f + 1.0f) * cellSize;
-        float y = margin + 4.0f * cellSize - cellSize * 0.1f;
+        float x = marginLeft + (4.0f + 1.0f) * cellSize;
+        float y = marginTop + 4.0f * cellSize - cellSize * 0.1f;
         float dx = ((float)GetRandomValue(-10, 10)) / 100.0f * cellSize;
         SmokeParticle p;
         p.pos = { x + dx, y };
@@ -65,11 +67,11 @@ void Generator::Draw() const {
     // ---  расна€ овальна€ окружность выделени€ ---
     if (selected) {
         // ќвал должен быть по центру нижних двух клеток (4,5)-(5,5)
-        float x = margin + 4 * cellSize;
-        float y = margin + 5 * cellSize;
+        float x = marginLeft + 4 * cellSize;
+        float y = marginTop + 5 * cellSize;
         float w = 2 * cellSize;
         float h = (2 * cellSize) / 3.0f;
-        float offsetY = h / 4.0f; // смещение вниз на 1/4 высоты овала
+        float offsetY = generatorSelectionOvalYOffset * h;
         DrawSelectionOval(x, y, w, h, offsetY);
     }
 
@@ -80,8 +82,8 @@ void Generator::Draw() const {
         (float)generator_.height
     };
     Rectangle dst = {
-        margin + 4 * cellSize,
-        margin + 4 * cellSize,
+        marginLeft + 4 * cellSize,
+        marginTop + 4 * cellSize,
         2 * cellSize,
         2 * cellSize
     };
@@ -97,8 +99,8 @@ void Generator::DrawSmoke() const {
 
 void Generator::DrawFireflyGlow() const {
     // Glow ¬¬≈–’” генератора: центр между верхними двум€ клетками
-    float x = margin + (4.0f + 1.0f) * cellSize;
-    float y = margin + 4.0f * cellSize + cellSize * 0.25f;
+    float x = marginLeft + (4.0f + 1.0f) * cellSize;
+    float y = marginTop + 4.0f * cellSize + cellSize * 0.25f;
     float r = cellSize * 0.18f;
 
     // Ёффект свечени€: 2-3 очень прозрачных сло€, радиус небольшой
@@ -114,8 +116,8 @@ void Generator::DrawFireflyGlow() const {
 }
 
 bool Generator::IsClicked(float mouseX, float mouseY) const {
-    float x = margin + 4 * cellSize;
-    float y = margin + 4 * cellSize;
+    float x = marginLeft + 4 * cellSize;
+    float y = marginTop + 4 * cellSize;
     Rectangle rect = { x, y, 2 * cellSize, 2 * cellSize };
     return CheckCollisionPointRec({mouseX, mouseY}, rect) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
 }
@@ -130,4 +132,8 @@ void Generator::DrawSelectionOval(float x, float y, float width, float height, f
         DrawEllipseLines((int)cx, (int)cy, rx - i, ry - i * 0.7f, RED);
         DrawEllipseLines((int)cx, (int)cy, rx + i, ry + i * 0.7f, RED);
     }
+}
+
+void Generator::SetSelectionOvalYOffset(float offset) {
+    generatorSelectionOvalYOffset = offset;
 }

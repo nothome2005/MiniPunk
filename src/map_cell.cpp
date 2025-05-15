@@ -1,4 +1,12 @@
 #include "map_cell.h"
+#include <utility>
+
+std::unordered_map<ResourceType, float> selectionOvalYOffset = {
+    {ResourceType::Tree, 0.3f},
+    {ResourceType::Coal, 0.1f},
+    {ResourceType::Stone, 0.25f},
+    {ResourceType::None, 0.25f}
+};
 
 MapCell::MapCell() : type(ResourceType::None), mass(0), texture(nullptr), selected(false) {}
 
@@ -7,13 +15,21 @@ MapCell::MapCell(ResourceType type, int mass, Texture* texture)
 
 void MapCell::Draw(float x, float y, float size) const {
     if (selected) {
-        DrawSelectionOval(x, y, size, size / 4.0f); // смещение вниз на 1/4 клетки
+        float offset = 0.0f;
+        auto it = selectionOvalYOffset.find(type);
+        if (it != selectionOvalYOffset.end())
+            offset = it->second * size;
+        DrawSelectionOval(x, y, size, offset);
     }
     if (type != ResourceType::None && texture) {
+        float yOffset = 0.0f;
+        if (type == ResourceType::Tree) {
+            yOffset = -size * 0.12f; // Поднять дерево вверх на 12% высоты клетки
+        }
         DrawTexturePro(
             *texture,
             Rectangle{0, 0, (float)texture->width, (float)texture->height},
-            Rectangle{x, y, size, size},
+            Rectangle{x, y + yOffset, size, size},
             Vector2{0, 0},
             0.0f,
             WHITE
@@ -45,4 +61,8 @@ void MapCell::DrawSelectionOval(float x, float y, float size, float offsetY) {
         DrawEllipseLines((int)cx, (int)cy, rx - i, ry - i * 0.7f, RED);
         DrawEllipseLines((int)cx, (int)cy, rx + i, ry + i * 0.7f, RED);
     }
+}
+
+void MapCell::SetSelectionOvalYOffset(ResourceType type, float offset) {
+    selectionOvalYOffset[type] = offset;
 }
