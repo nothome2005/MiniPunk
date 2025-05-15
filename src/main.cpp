@@ -2,6 +2,8 @@
 #include "resource_dir.h"
 #include "resource_manager.h"
 #include "grid.h"
+#include "map_generator.h"
+#include "generator.h"
 
 int main ()
 {
@@ -17,6 +19,15 @@ int main ()
     Grid grid(gridSize, gridSize, margin, cellSize);
 
     LoadResources();
+
+    // --- map generation ---
+    auto mapCells = MapGenerator::Generate(gridSize, gridSize, 3, 3, 3, 10);
+    grid.SetMapCells(mapCells);
+
+    // --- generator ---
+    Generator generator(cellSize, margin);
+    grid.SetGenerator(&generator);
+
     while (!WindowShouldClose())
     {
         grid.Update();
@@ -31,10 +42,7 @@ int main ()
         EndDrawing();
     }
 
-    // cleanup
     UnloadResources();
-
-    // destroy the window and cleanup the OpenGL context
     CloseWindow();
     return 0;
 }

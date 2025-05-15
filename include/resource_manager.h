@@ -3,6 +3,10 @@
 
 // √лобальный доступ к текстурам (и другим ресурсам)
 extern Texture g_background;
+extern Texture coal_;
+extern Texture iron_;
+extern Texture tree_;
+extern Texture generator_;
 
 // «агрузка всех ресурсов
 void LoadResources();
