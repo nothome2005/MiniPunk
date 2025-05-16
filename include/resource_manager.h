@@ -7,6 +7,9 @@ extern Texture coal_;
 extern Texture iron_;
 extern Texture tree_;
 extern Texture generator_;
+extern Texture ObjectCanva_;
+extern Texture cursor_; // Добавить глобальную переменную для курсора
+extern Font objectPanelFont; // Новый глобальный шрифт для панели
 
 // Загрузка всех ресурсов
 void LoadResources();

@@ -17,6 +17,10 @@ public:
     // Генератор
     void SetGenerator(Generator* gen);
 
+    // --- Новый публичный доступ к mapCells и generator ---
+    const std::vector<MapCell>& GetMapCells() const { return mapCells; }
+    Generator* GetGenerator() const { return generator; }
+
 private:
     int rows, cols;
     float marginLeft, marginTop, cellSize;
