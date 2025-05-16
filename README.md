@@ -1,4 +1,4 @@
-# MiniPunk.md
+# MiniPunk
 
 [![Скріншот з гри на момент 16.05.2025](https://i.postimg.cc/d1WTxkPC/viber-2025-05-16-20-27-01-305.jpg "Скріншот з гри на момент 16.05.2025")](http:/https://i.postimg.cc/d1WTxkPC/viber-2025-05-16-20-27-01-305.jpg/ "Скріншот з гри на момент 16.05.2025")
 
