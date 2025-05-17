@@ -24,7 +24,7 @@ void MapCell::Draw(float x, float y, float size) const {
     if (type != ResourceType::None && texture) {
         float yOffset = 0.0f;
         if (type == ResourceType::Tree) {
-            yOffset = -size * 0.12f; // Поднять дерево вверх на 12% высоты клетки
+            yOffset = -size * 0.12f;
         }
         DrawTexturePro(
             *texture,

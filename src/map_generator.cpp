@@ -5,13 +5,12 @@
 #include <vector>
 
 namespace {
-// Проверка, что позиция (x, y) не занята и вокруг нее нет ресурсов
 bool CanPlace(const std::vector<MapCell>& cells, int rows, int cols, int x, int y) {
-    // Запретить спавн вблизи генератора: квадрат 4x4 (3,3)-(6,6) для 10x10
+
     if (x >= 3 && x <= 6 && y >= 3 && y <= 6)
         return false;
 
-    // Проверяем все клетки вокруг (включая саму)
+
     for (int dy = -1; dy <= 1; ++dy) {
         for (int dx = -1; dx <= 1; ++dx) {
             int nx = x + dx;
@@ -29,8 +28,6 @@ bool CanPlace(const std::vector<MapCell>& cells, int rows, int cols, int x, int 
 std::vector<MapCell> MapGenerator::Generate(int rows, int cols, int treeCount, int coalCount, int stoneCount, int massPerCell) {
     int total = rows * cols;
     std::vector<MapCell> cells(total);
-
-    // Список всех позиций, кроме центральных 4 клеток
     std::vector<std::pair<int, int>> positions;
     for (int y = 0; y < rows; ++y)
         for (int x = 0; x < cols; ++x)
@@ -51,7 +48,6 @@ std::vector<MapCell> MapGenerator::Generate(int rows, int cols, int treeCount, i
                 placed++;
             }
         }
-        // Можно добавить предупреждение, если placed < count
     };
 
     try_place(ResourceType::Tree, treeCount, &tree_);

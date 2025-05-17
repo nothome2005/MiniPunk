@@ -1,7 +1,7 @@
 #include "grid.h"
-#include "raylib.h" // For DrawCircle
+#include "raylib.h" 
 
-// Темно-синий цвет клетки
+
 static const Color DARK_BLUE_CELL = { 20, 30, 60, 255 };
 
 Grid::Grid(int rows, int cols, float marginLeft, float marginTop, float cellSize)
@@ -32,7 +32,7 @@ void Grid::DeselectAll() {
 }
 
 void Grid::Draw() const {
-    // Рисуем прозрачную морозно тёмно-синюю сетку
+    
     static const Color FROSTY_DARK_BLUE_TRANSPARENT = { 30, 50, 80, 120 };
     for (int y = 0; y <= rows; ++y) {
         float yPos = marginTop + y * cellSize;
@@ -65,7 +65,7 @@ void Grid::Update() {
 
     Vector2 mouse = GetMousePosition();
 
-    // Проверка генератора
+    
     if (generator && generator->IsClicked(mouse.x, mouse.y)) {
         if (generator->IsSelected()) {
             generator->SetSelected(false);
@@ -76,7 +76,7 @@ void Grid::Update() {
         return;
     }
 
-    // Проверка по клеткам
+    // Обробка натискання на клітинку
     for (size_t i = 0; i < buttons.size(); ++i) {
         if (i < mapCells.size() && mapCells[i].GetType() != ResourceType::None) {
             float x = buttons[i].rect.x;

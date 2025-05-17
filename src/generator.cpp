@@ -58,15 +58,13 @@ void Generator::UpdateFirefly() {
 }
 
 void Generator::Draw() const {
-    // Дым рисуем под генератором
-    DrawSmoke();
 
-    // Светящийся овал (glow) ВВЕРХУ генератора (центр верхних двух клеток)
+    DrawSmoke();
     DrawFireflyGlow();
 
-    // --- Красная овальная окружность выделения ---
+    // --- Малюємо овал виділення генератора ---
     if (selected) {
-        // Овал должен быть по центру нижних двух клеток (4,5)-(5,5)
+        // Овал малюється під генератором у центрі сітки (4,5)-(5,5)
         float x = marginLeft + 4 * cellSize;
         float y = marginTop + 5 * cellSize;
         float w = 2 * cellSize;
@@ -75,7 +73,7 @@ void Generator::Draw() const {
         DrawSelectionOval(x, y, w, h, offsetY);
     }
 
-    // Рисуем текстуру генератора, подгоняя под 4 клетки (2x2)
+    // Малюємо текстуру генератора, займає 4 клітинки (2x2)
     Rectangle src = {
         0.0f, 0.0f,
         (float)generator_.width,
@@ -98,12 +96,12 @@ void Generator::DrawSmoke() const {
 }
 
 void Generator::DrawFireflyGlow() const {
-    // Glow ВВЕРХУ генератора: центр между верхними двумя клетками
+    // Glow навколо генератора: кілька шарів жовтого світла
     float x = marginLeft + (4.0f + 1.0f) * cellSize;
     float y = marginTop + 4.0f * cellSize + cellSize * 0.25f;
     float r = cellSize * 0.18f;
 
-    // Эффект свечения: 2-3 очень прозрачных слоя, радиус небольшой
+    
     const int layers = 3;
     float baseAlpha = fireflyAlpha;
     for (int i = layers - 1; i >= 0; --i) {

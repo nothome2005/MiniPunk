@@ -2,8 +2,7 @@
 #include "resource_manager.h"
 #include "raylib.h"
 #include <string>
-
-
+#include <unordered_map>
 
 static std::string GetResourceName(ResourceType type) {
     switch (type) {
@@ -14,7 +13,14 @@ static std::string GetResourceName(ResourceType type) {
     }
 }
 
-// Получить текстуру ресурса по типу
+// Словник для індивідуального зміщення координат тексту імені об'єкта
+static std::unordered_map<ResourceType, Vector2> objectNameTextOffset = {
+    {ResourceType::Tree, {0, 0}},
+    {ResourceType::Coal, {0, -300}},
+    {ResourceType::None, {0, 0}}
+};
+
+// Отримати текстуру ресурсу за типом
 static Texture* GetResourceTexture(ResourceType type) {
     switch (type) {
         case ResourceType::Tree: return &tree_;
@@ -24,12 +30,10 @@ static Texture* GetResourceTexture(ResourceType type) {
     }
 }
 
-// Отрисовать поверх панели выбранный объект (ресурс или генератор)
+
 void DrawObjectPanel(float x, float y, const Grid& grid) {
-    // Сначала рисуем панель и иконку, затем текст поверх всех элементов
     DrawTexture(ObjectCanva_, (int)x, (int)y, WHITE);
 
-    // Найти выбранную клетку или генератор
     const MapCell* selectedCell = nullptr;
     for (const auto& cell : grid.GetMapCells()) {
         if (cell.IsSelected()) {
@@ -39,7 +43,6 @@ void DrawObjectPanel(float x, float y, const Grid& grid) {
     }
     const Generator* selectedGen = (grid.GetGenerator() && grid.GetGenerator()->IsSelected()) ? grid.GetGenerator() : nullptr;
 
-    // Центр панели
     int panelCenterX = (int)x + ObjectCanva_.width / 2 - 25;
     int panelCenterY = (int)y + ObjectCanva_.height / 3;
 
@@ -57,8 +60,9 @@ void DrawObjectPanel(float x, float y, const Grid& grid) {
         float iconY = (float)(panelCenterY - iconH / 2 - 20);
         name = GetResourceName(selectedCell->GetType());
         textSize = MeasureTextEx(objectPanelFont, name.c_str(), fontSize, 2);
-        textX = (float)(panelCenterX - textSize.x / 2);
-        textY = iconY - textSize.y - 8;
+        Vector2 offset = objectNameTextOffset[selectedCell->GetType()];
+        textX = (float)(panelCenterX - textSize.x / 2) + offset.x;
+        textY = iconY - textSize.y - 8 + offset.y;
         if (tex && tex->id != 0) {
             DrawTextureEx(*tex, {(float)(panelCenterX - iconW / 2), iconY}, 0, scale, WHITE);
         }
@@ -70,26 +74,32 @@ void DrawObjectPanel(float x, float y, const Grid& grid) {
         float iconY = (float)(panelCenterY - iconH / 2 - 20);
         name = "Generator";
         textSize = MeasureTextEx(objectPanelFont, name.c_str(), fontSize, 2);
-        textX = (float)(panelCenterX - textSize.x / 2);
-        textY = iconY - textSize.y - 8;
+        // Для генератора можна додати окреме зміщення, якщо потрібно
+        Vector2 offset = {0, 0};
+        textX = (float)(panelCenterX - textSize.x / 2) + offset.x;
+        textY = iconY - textSize.y - 8 + offset.y;
         if (generator_.id != 0) {
             DrawTextureEx(generator_, {(float)(panelCenterX - iconW / 2), iconY}, 0, scale, WHITE);
         }
         drawName = true;
     }
 
-    // Текст рисуем в самом конце, поверх всех элементов
+    // Текст малюємо в самому кінці, поверх усіх елементів
     if (drawName && objectPanelFont.texture.id != 0) {
         DrawTextEx(objectPanelFont, name.c_str(), {textX, textY}, fontSize, 2, RED);
+        // Для відладки: вивід координат textX/textY
+        char coordBuf[64];
+        snprintf(coordBuf, sizeof(coordBuf), "x:%.0f y:%.0f", textX, textY);
+        DrawText(coordBuf, (int)x + 10, (int)y + 10, 16, YELLOW);
     }
-    // Для отладки: рисуем "Test Text <object name>" по центру панели белым цветом и меньшим размером
+    // Для відладки: малюємо "Test Text <object name>" по центру панелі білим кольором і меншим розміром
     std::string testStr;
     if (selectedCell && selectedCell->GetType() != ResourceType::None) {
         testStr += " ";
         testStr += GetResourceName(selectedCell->GetType());
     } else if (selectedGen) {
         testStr += " Generator";
-		extraX = 30.0f;
+        extraX = 30.0f;
     }
     int testFontSize = 18;
     Vector2 testTextSize = MeasureTextEx(GetFontDefault(), testStr.c_str(), testFontSize, 2);
