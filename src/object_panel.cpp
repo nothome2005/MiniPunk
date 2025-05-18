@@ -13,11 +13,12 @@ static std::string GetResourceName(ResourceType type) {
     }
 }
 
-// Словник для індивідуального зміщення координат тексту імені об'єкта
-static std::unordered_map<ResourceType, Vector2> objectNameTextOffset = {
-    {ResourceType::Tree, {0, 0}},
-    {ResourceType::Coal, {0, -300}},
-    {ResourceType::None, {0, 0}}
+// Словник для індивідуального зміщення тексту панелі по X
+static std::unordered_map<ResourceType, float> objectPanelTextOffsetX = {
+    {ResourceType::Tree, -50.0f},
+    {ResourceType::Coal, -40.0f},
+    {ResourceType::Stone, -50.0f},
+    {ResourceType::None, -60.0f} // Можна використати для генератора
 };
 
 // Отримати текстуру ресурсу за типом
@@ -29,7 +30,6 @@ static Texture* GetResourceTexture(ResourceType type) {
         default: return nullptr;
     }
 }
-
 
 void DrawObjectPanel(float x, float y, const Grid& grid) {
     DrawTexture(ObjectCanva_, (int)x, (int)y, WHITE);
@@ -46,7 +46,7 @@ void DrawObjectPanel(float x, float y, const Grid& grid) {
     int panelCenterX = (int)x + ObjectCanva_.width / 2 - 25;
     int panelCenterY = (int)y + ObjectCanva_.height / 3;
 
-    float textX = 0, textY = 0, extraX = 0, extraY = 0;
+    float textX = 0, textY = 0;
     std::string name;
     int fontSize = 28;
     Vector2 textSize = {0, 0};
@@ -60,9 +60,9 @@ void DrawObjectPanel(float x, float y, const Grid& grid) {
         float iconY = (float)(panelCenterY - iconH / 2 - 20);
         name = GetResourceName(selectedCell->GetType());
         textSize = MeasureTextEx(objectPanelFont, name.c_str(), fontSize, 2);
-        Vector2 offset = objectNameTextOffset[selectedCell->GetType()];
-        textX = (float)(panelCenterX - textSize.x / 2) + offset.x;
-        textY = iconY - textSize.y - 8 + offset.y;
+        float offsetX = objectPanelTextOffsetX[selectedCell->GetType()];
+        textX = (float)(panelCenterX - textSize.x / 2) + offsetX;
+        textY = iconY - textSize.y - 8;
         if (tex && tex->id != 0) {
             DrawTextureEx(*tex, {(float)(panelCenterX - iconW / 2), iconY}, 0, scale, WHITE);
         }
@@ -74,39 +74,29 @@ void DrawObjectPanel(float x, float y, const Grid& grid) {
         float iconY = (float)(panelCenterY - iconH / 2 - 20);
         name = "Generator";
         textSize = MeasureTextEx(objectPanelFont, name.c_str(), fontSize, 2);
-        // Для генератора можна додати окреме зміщення, якщо потрібно
-        Vector2 offset = {0, 0};
-        textX = (float)(panelCenterX - textSize.x / 2) + offset.x;
-        textY = iconY - textSize.y - 8 + offset.y;
+        float offsetX = objectPanelTextOffsetX[ResourceType::None]; // Для генератора
+        textX = (float)(panelCenterX - textSize.x / 2) + offsetX;
+        textY = iconY - textSize.y - 8;
         if (generator_.id != 0) {
             DrawTextureEx(generator_, {(float)(panelCenterX - iconW / 2), iconY}, 0, scale, WHITE);
         }
         drawName = true;
     }
 
-    // Текст малюємо в самому кінці, поверх усіх елементів
-    if (drawName && objectPanelFont.texture.id != 0) {
-        DrawTextEx(objectPanelFont, name.c_str(), {textX, textY}, fontSize, 2, RED);
-        // Для відладки: вивід координат textX/textY
-        char coordBuf[64];
-        snprintf(coordBuf, sizeof(coordBuf), "x:%.0f y:%.0f", textX, textY);
-        DrawText(coordBuf, (int)x + 10, (int)y + 10, 16, YELLOW);
-    }
-    // Для відладки: малюємо "Test Text <object name>" по центру панелі білим кольором і меншим розміром
     std::string testStr;
+    ResourceType testType = ResourceType::None;
     if (selectedCell && selectedCell->GetType() != ResourceType::None) {
         testStr += " ";
         testStr += GetResourceName(selectedCell->GetType());
+        testType = selectedCell->GetType();
     } else if (selectedGen) {
         testStr += " Generator";
-        extraX = 30.0f;
+        testType = ResourceType::None;
     }
     int testFontSize = 18;
-    Vector2 testTextSize = MeasureTextEx(GetFontDefault(), testStr.c_str(), testFontSize, 2);
-    int testTextX = (int)x + ObjectCanva_.width / 2 - (int)(testTextSize.x - extraX);
-    int testTextY = (int)y + ObjectCanva_.height / 2 - 50.0f;
+    Vector2 testTextSize = MeasureTextEx(objectPanelFont, testStr.c_str(), testFontSize, 2);
+    float testOffsetX = objectPanelTextOffsetX[testType];
+    int testTextX = (int)x + (ObjectCanva_.width - (int)testTextSize.x) / 2 + (int)testOffsetX;
+    int testTextY = 300;
     DrawText(testStr.c_str(), testTextX, testTextY, testFontSize, WHITE);
-    if (objectPanelFont.texture.id == 0) {
-        DrawText("NO FONT!", 10, 40, 30, RED);
-    }
 }

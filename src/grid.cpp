@@ -1,6 +1,7 @@
 #include "grid.h"
 #include "raylib.h" 
 
+extern bool g_objectsSelectable;
 
 static const Color DARK_BLUE_CELL = { 20, 30, 60, 255 };
 
@@ -63,9 +64,10 @@ void Grid::Draw() const {
 void Grid::Update() {
     if (generator) generator->Update();
 
+    if (!g_objectsSelectable) return;
+
     Vector2 mouse = GetMousePosition();
 
-    
     if (generator && generator->IsClicked(mouse.x, mouse.y)) {
         if (generator->IsSelected()) {
             generator->SetSelected(false);

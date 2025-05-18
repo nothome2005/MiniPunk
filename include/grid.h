@@ -21,13 +21,13 @@ public:
     const std::vector<MapCell>& GetMapCells() const { return mapCells; }
     Generator* GetGenerator() const { return generator; }
 
+    // --- Сделать DeselectAll публичным ---
+    void DeselectAll();
+
 private:
     int rows, cols;
     float marginLeft, marginTop, cellSize;
     std::vector<Button> buttons;
     std::vector<MapCell> mapCells;
     Generator* generator = nullptr;
-
-    // --- Выделение ---
-    void DeselectAll();
 };

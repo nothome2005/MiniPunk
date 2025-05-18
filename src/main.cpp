@@ -16,14 +16,22 @@ const float objectCanvaSpeed = 1600.0f;
 extern Texture2D ObjectCanva_;
 extern Texture2D cursor_;
 
+// Глобальная переменная, управляющая возможностью выбора объектов
+bool g_objectsSelectable = false;
+
 int main ()
 {
     SetConfigFlags(FLAG_WINDOW_HIGHDPI);
 
-    InitWindow(1200, 1024, "MiniPunk");
+    if (g_objectsSelectable) {
+        InitWindow(1200, 1024, "MiniPunk-Selectable");
+    }
+    else
+    {
+        InitWindow(1024, 1024, "MiniPunk-NonSelect");
+    }
     SetTargetFPS(60);
     SearchAndSetResourceDir("resources");
-
     HideCursor();
 
     // --- grid setup ---
@@ -47,16 +55,19 @@ int main ()
 
     while (!WindowShouldClose())
     {
+        // Если выбор объектов запрещён, снимаем выделение
+        if (!g_objectsSelectable) {
+            grid.DeselectAll();
+        }
         grid.Update();
 
-        
         bool anySelected = false;
-        
-        for (const auto& cell : grid.GetMapCells()) {
-            if (cell.IsSelected()) { anySelected = true; break; }
+        if (g_objectsSelectable) {
+            for (const auto& cell : grid.GetMapCells()) {
+                if (cell.IsSelected()) { anySelected = true; break; }
+            }
+            if (grid.GetGenerator() && grid.GetGenerator()->IsSelected()) anySelected = true;
         }
-        
-        if (grid.GetGenerator() && grid.GetGenerator()->IsSelected()) anySelected = true;
 
         float targetX = anySelected ? objectCanvaTargetX : objectCanvaHiddenX;
         if (objectCanvaX < targetX) {
@@ -74,9 +85,7 @@ int main ()
 
         grid.Draw();
 
-      
         DrawObjectPanel(objectCanvaX, objectCanvaY, grid);
-
 
         Vector2 mouse = GetMousePosition();
         DrawTexture(cursor_, (int)mouse.x-25, (int)mouse.y-20, WHITE);
