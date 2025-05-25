@@ -6,39 +6,18 @@
 #include "grid.h"
 #include "map_generator.h"
 #include "generator.h"
-#include "object_panel.h"
 #include "player.h"
 #include "wolf.h"
 #include "game_state.h"
 
-float objectCanvaX = 1200.0f; 
-const float objectCanvaTargetX = 800.0f;
-const float objectCanvaHiddenX = 1200.0f; 
-const float objectCanvaY = 200.0f;
-const float objectCanvaSpeed = 1600.0f;
-
-extern Texture2D ObjectCanva_;
-extern Texture2D cursor_;
-
-// √лобальна€ переменна€, управл€юща€ возможностью выбора объектов
-bool g_objectsSelectable = false;
-
 int main ()
 {
     SetConfigFlags(FLAG_WINDOW_HIGHDPI);
-
-    if (g_objectsSelectable) {
-        InitWindow(1200, 1024, "MiniPunk-Selectable");
-    }
-    else
-    {
-        InitWindow(1024, 1024, "MiniPunk-NonSelect");
-    }
+    InitWindow(1024, 1024, "MiniPunk");
     SetTargetFPS(60);
     SearchAndSetResourceDir("resources");
     HideCursor();
 
-    // --- grid setup ---
     constexpr int gridSize = 10;
     constexpr float marginLeft = 50.0f;
     constexpr float marginTop = 150.0f;
@@ -49,14 +28,12 @@ int main ()
 
     LoadResources();
 
-    // --- map generation ---
     auto mapCells = MapGenerator::Generate(gridSize, gridSize, 3, 3, 3, 10);
     grid.SetMapCells(mapCells);
 
     Generator generator(cellSize, marginLeft, marginTop);
     grid.SetGenerator(&generator);
 
-    // --- создание игрока в случайной свободной клетке ---
     std::vector<Vector2> freeCells;
     const auto& cells = grid.GetMapCells();
     for (int y = 0; y < gridSize; ++y) {
@@ -73,7 +50,6 @@ int main ()
     Vector2 spawn = freeCells[dist(g)];
     Player player((int)spawn.x, (int)spawn.y);
 
-    // --- волк спавнитс€ в случайном углу ---
     std::vector<Vector2> wolfCorners = {
         {0, 0}, {0, gridSize-1}, {gridSize-1, 0}, {gridSize-1, gridSize-1}
     };
@@ -82,7 +58,6 @@ int main ()
     WolfMoveStrategy wolfStrategy;
     Wolf wolf((int)wolfSpawn.x, (int)wolfSpawn.y, &wolfStrategy);
 
-    // --- State pattern ---
     GameState* currentState = nullptr;
     PlayerTurnState playerState(player, wolf, grid, currentState);
     WolfTurnState wolfState(player, wolf, grid, currentState);
@@ -93,38 +68,15 @@ int main ()
     while (!WindowShouldClose())
     {
         float delta = GetFrameTime();
-        if (!g_objectsSelectable) {
-            grid.DeselectAll();
-        }
         grid.Update();
-
         currentState->Update(delta);
-
-        float targetX = objectCanvaTargetX;
-        float anySelected = false;
-        if (g_objectsSelectable) {
-            for (const auto& cell : grid.GetMapCells()) {
-                if (cell.IsSelected()) { anySelected = true; break; }
-            }
-            if (grid.GetGenerator() && grid.GetGenerator()->IsSelected()) anySelected = true;
-        }
-        targetX = anySelected ? objectCanvaTargetX : objectCanvaHiddenX;
-        if (objectCanvaX < targetX) {
-            objectCanvaX += objectCanvaSpeed * delta;
-            if (objectCanvaX > targetX) objectCanvaX = targetX;
-        } else if (objectCanvaX > targetX) {
-            objectCanvaX -= objectCanvaSpeed * delta;
-            if (objectCanvaX < targetX) objectCanvaX = targetX;
-        }
 
         BeginDrawing();
         ClearBackground(BLACK);
-
         DrawTexture(g_background, 0, 0, WHITE);
         grid.Draw();
         player.Draw(cellSize, marginLeft, marginTop);
         wolf.Draw(cellSize, marginLeft, marginTop);
-        DrawObjectPanel(objectCanvaX, objectCanvaY, grid);
         Vector2 mouse = GetMousePosition();
         DrawTexture(cursor_, (int)mouse.x-25, (int)mouse.y-20, WHITE);
         EndDrawing();

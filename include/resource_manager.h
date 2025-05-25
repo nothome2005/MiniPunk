@@ -7,11 +7,9 @@ extern Texture coal_;
 extern Texture iron_;
 extern Texture tree_;
 extern Texture generator_;
-extern Texture ObjectCanva_;
-extern Texture cursor_; // Добавить глобальную переменную для курсора
-extern Texture player_idle_texture; // Добавлен extern Texture для текстуры игрока
-extern Texture wolf_texture; // Добавлен extern Texture для спрайта волка
-extern Font objectPanelFont; // Новый глобальный шрифт для панели
+extern Texture cursor_;
+extern Texture player_idle_texture;
+extern Texture wolf_texture;
 
 // Загрузка всех ресурсов
 void LoadResources();
