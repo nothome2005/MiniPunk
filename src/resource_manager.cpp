@@ -10,6 +10,8 @@ Texture generator_ = { 0 };
 Texture ObjectCanva_ = { 0 };
 Texture cursor_ = { 0 };
 Font objectPanelFont = { 0 };
+Texture player_idle_texture = { 0 };
+Texture wolf_texture = { 0 };
 
 void LoadResources()
 {
@@ -20,6 +22,8 @@ void LoadResources()
     generator_ = LoadTexture("generator3.png");
     ObjectCanva_ = LoadTexture("ObjectInfoCanva2.png");
     cursor_ = LoadTexture("cursor.png");
+    player_idle_texture = LoadTexture("Player_IDLE.png");
+    wolf_texture = LoadTexture("wolf.png");
     
     const char* chars =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
@@ -41,6 +45,8 @@ void UnloadResources()
     UnloadTexture(generator_);
     UnloadTexture(ObjectCanva_);
     UnloadTexture(cursor_);
+    UnloadTexture(player_idle_texture);
+    UnloadTexture(wolf_texture);
     UnloadFont(objectPanelFont);
 }
 

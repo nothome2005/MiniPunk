@@ -1,3 +1,5 @@
+#include <random>
+#include <memory>
 #include "raylib.h"
 #include "resource_dir.h"
 #include "resource_manager.h"
@@ -5,7 +7,9 @@
 #include "map_generator.h"
 #include "generator.h"
 #include "object_panel.h"
-
+#include "player.h"
+#include "wolf.h"
+#include "game_state.h"
 
 float objectCanvaX = 1200.0f; 
 const float objectCanvaTargetX = 800.0f;
@@ -49,32 +53,67 @@ int main ()
     auto mapCells = MapGenerator::Generate(gridSize, gridSize, 3, 3, 3, 10);
     grid.SetMapCells(mapCells);
 
-    
     Generator generator(cellSize, marginLeft, marginTop);
     grid.SetGenerator(&generator);
 
+    // --- создание игрока в случайной свободной клетке ---
+    std::vector<Vector2> freeCells;
+    const auto& cells = grid.GetMapCells();
+    for (int y = 0; y < gridSize; ++y) {
+        for (int x = 0; x < gridSize; ++x) {
+            int idx = y * gridSize + x;
+            if (cells[idx].GetType() == ResourceType::None) {
+                freeCells.push_back({(float)x, (float)y});
+            }
+        }
+    }
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::uniform_int_distribution<> dist(0, (int)freeCells.size() - 1);
+    Vector2 spawn = freeCells[dist(g)];
+    Player player((int)spawn.x, (int)spawn.y);
+
+    // --- волк спавнится в случайном углу ---
+    std::vector<Vector2> wolfCorners = {
+        {0, 0}, {0, gridSize-1}, {gridSize-1, 0}, {gridSize-1, gridSize-1}
+    };
+    std::uniform_int_distribution<> wolfDist(0, 3);
+    Vector2 wolfSpawn = wolfCorners[wolfDist(g)];
+    WolfMoveStrategy wolfStrategy;
+    Wolf wolf((int)wolfSpawn.x, (int)wolfSpawn.y, &wolfStrategy);
+
+    // --- State pattern ---
+    GameState* currentState = nullptr;
+    PlayerTurnState playerState(player, wolf, grid, currentState);
+    WolfTurnState wolfState(player, wolf, grid, currentState);
+    playerState.SetWolfState(&wolfState);
+    wolfState.SetPlayerState(&playerState);
+    currentState = &playerState;
+
     while (!WindowShouldClose())
     {
-        // Если выбор объектов запрещён, снимаем выделение
+        float delta = GetFrameTime();
         if (!g_objectsSelectable) {
             grid.DeselectAll();
         }
         grid.Update();
 
-        bool anySelected = false;
+        currentState->Update(delta);
+
+        float targetX = objectCanvaTargetX;
+        float anySelected = false;
         if (g_objectsSelectable) {
             for (const auto& cell : grid.GetMapCells()) {
                 if (cell.IsSelected()) { anySelected = true; break; }
             }
             if (grid.GetGenerator() && grid.GetGenerator()->IsSelected()) anySelected = true;
         }
-
-        float targetX = anySelected ? objectCanvaTargetX : objectCanvaHiddenX;
+        targetX = anySelected ? objectCanvaTargetX : objectCanvaHiddenX;
         if (objectCanvaX < targetX) {
-            objectCanvaX += objectCanvaSpeed * GetFrameTime();
+            objectCanvaX += objectCanvaSpeed * delta;
             if (objectCanvaX > targetX) objectCanvaX = targetX;
         } else if (objectCanvaX > targetX) {
-            objectCanvaX -= objectCanvaSpeed * GetFrameTime();
+            objectCanvaX -= objectCanvaSpeed * delta;
             if (objectCanvaX < targetX) objectCanvaX = targetX;
         }
 
@@ -82,14 +121,12 @@ int main ()
         ClearBackground(BLACK);
 
         DrawTexture(g_background, 0, 0, WHITE);
-
         grid.Draw();
-
+        player.Draw(cellSize, marginLeft, marginTop);
+        wolf.Draw(cellSize, marginLeft, marginTop);
         DrawObjectPanel(objectCanvaX, objectCanvaY, grid);
-
         Vector2 mouse = GetMousePosition();
         DrawTexture(cursor_, (int)mouse.x-25, (int)mouse.y-20, WHITE);
-
         EndDrawing();
     }
 
