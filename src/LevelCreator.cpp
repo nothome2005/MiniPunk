@@ -5,6 +5,8 @@
 #include <filesystem>
 #include <fstream>
 
+bool g_EditorBackToMenu = false;
+
 LevelCreator::LevelCreator()
     : rows(10), cols(10), marginLeft(50.0f), marginTop(150.0f), cellSize((1024.0f - 50.0f - 250.0f) / 10),
       currentX(0), currentY(0),

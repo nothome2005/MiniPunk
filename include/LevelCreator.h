@@ -19,6 +19,8 @@ enum class EditorObjectType {
     Generator
 };
 
+extern bool g_EditorBackToMenu;
+
 class LevelCreator {
 public:
     LevelCreator();
