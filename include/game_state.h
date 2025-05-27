@@ -20,6 +20,8 @@ public:
     PlayerTurnState(Player& player, Wolf& wolf, Grid& grid, GameState*& statePtr)
         : player(player), wolf(wolf), grid(grid), statePtr(statePtr), wolfState(nullptr) {}
     void SetWolfState(GameState* ws) { wolfState = ws; }
+    Player& GetPlayer() { return player; }
+    Wolf& GetWolf() { return wolf; }
     void Update(float dt) override {
         player.Update(dt);
         if (player.HasMoved()) {
@@ -41,6 +43,8 @@ public:
     WolfTurnState(Player& player, Wolf& wolf, Grid& grid, GameState*& statePtr)
         : player(player), wolf(wolf), grid(grid), statePtr(statePtr), playerState(nullptr) {}
     void SetPlayerState(GameState* ps) { playerState = ps; }
+    Player& GetPlayer() { return player; }
+    Wolf& GetWolf() { return wolf; }
     void Update(float dt) override {
         wolf.Update(dt);
         if (wolf.IsTurnFinished()) {

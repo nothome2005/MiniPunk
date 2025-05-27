@@ -12,6 +12,7 @@ public:
     bool HasMoved() const;
     void Update(float dt) override; // теперь принимает dt
     void Draw(float cellSize, float marginLeft, float marginTop) const override;
+    void SetGridSize(int w, int h) { gridWidth = w; gridHeight = h; }
 
 private:
     int x, y;

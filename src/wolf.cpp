@@ -6,7 +6,8 @@
 std::pair<int, int> WolfMoveStrategy::GetNextMove(const Grid& grid, const Player& player, int x, int y) {
     int px = (int)player.GetPosition().x;
     int py = (int)player.GetPosition().y;
-    int gridW = 10, gridH = 10;
+    int gridW = grid.GetCols();
+    int gridH = grid.GetRows();
     const auto& cells = grid.GetMapCells();
     // Y приоритет
     if (y < py) {

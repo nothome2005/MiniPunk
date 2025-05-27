@@ -24,6 +24,10 @@ public:
     // --- Сделать DeselectAll публичным ---
     void DeselectAll();
 
+    // --- Методы для получения размеров сетки ---
+    int GetRows() const { return rows; }
+    int GetCols() const { return cols; }
+
 private:
     int rows, cols;
     float marginLeft, marginTop, cellSize;
