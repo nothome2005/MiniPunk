@@ -1,18 +1,22 @@
 #pragma once
 #include "raylib.h"
+#include <functional>
+#include <string>
 
 class Button {
 public:
-    Button(float x, float y, float size, int gridX, int gridY);
+    Button(float x, float y, float w, float h, const std::string& text = "", int fontSize = 38);
 
     void Draw() const;
-    // Returns true if the button is clicked this frame
+    void Update(); // вызывает onClick при клике
+    void SetOnClick(std::function<void()> cb) { onClick = std::move(cb); }
+    bool IsHovered() const;
     bool IsClicked() const;
 
-    // Expose rect for debug/visualization
     Rectangle rect;
+    std::string text;
+    int fontSize;
 
-    // Grid coordinates
-    int gridX;
-    int gridY;
+private:
+    std::function<void()> onClick;
 };

@@ -11,7 +11,7 @@ Grid::Grid(int rows, int cols, float marginLeft, float marginTop, float cellSize
         for (int x = 0; x < cols; ++x) {
             float bx = marginLeft + x * cellSize;
             float by = marginTop + y * cellSize;
-            buttons.emplace_back(bx, by, cellSize, x, y);
+            buttons.emplace_back(bx, by, cellSize, cellSize);
         }
     }
     mapCells.resize(rows * cols);
@@ -45,7 +45,7 @@ void Grid::Draw() const {
     }
 
     for (size_t i = 0; i < buttons.size(); ++i) {
-        int gx = buttons[i].gridX, gy = buttons[i].gridY;
+        int gx = i % cols, gy = i / cols;
         bool isCenter = (gx == 4 || gx == 5) && (gy == 4 || gy == 5);
         if (i < mapCells.size() && !(generator && isCenter))
             mapCells[i].Draw(buttons[i].rect.x, buttons[i].rect.y, buttons[i].rect.width);

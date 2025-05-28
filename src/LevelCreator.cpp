@@ -14,10 +14,25 @@ LevelCreator::LevelCreator()
       objectTypes(rows * cols, EditorObjectType::None),
       grid(rows, cols, marginLeft, marginTop, cellSize),
       nameEditRect({50, 50, 300, 40}), nameEditActive(false),
-      btnIncRect({400, 50, 100, 40}), btnDecRect({520, 50, 100, 40}),
-      btnSaveRect({650, 50, 100, 40}), mapName{}
+      mapName{}
 {
     SyncGrid();
+    // Кнопка +
+    btnInc = std::make_unique<Button>(360, 100, 50, 40, "+", 32); // Перемещена рядом с полем ввода
+    btnInc->SetOnClick([this]() { ResizeGrid(std::min(20, cols + 1)); });
+    // Кнопка -
+    btnDec = std::make_unique<Button>(420, 100, 50, 40, "-", 32); // Перемещена рядом с полем ввода
+    btnDec->SetOnClick([this]() { ResizeGrid(std::max(5, cols - 1)); });
+    // Кнопка Save
+    btnSave = std::make_unique<Button>(360, 50, 100, 40, "Save", 32); // Перемещена рядом с полем ввода
+    btnSave->SetOnClick([this]() {
+        std::filesystem::create_directory("maps");
+        std::string fname = std::string("maps/") + (mapName[0] ? mapName : "unnamed") + ".lvl";
+        SaveToFile(fname.c_str());
+    });
+    // Кнопка Back
+    btnBack = std::make_unique<Button>(470, 50, 100, 40, "Back", 32); // Перемещена рядом с полем ввода
+    btnBack->SetOnClick([]() { g_EditorBackToMenu = true; });
 }
 
 void LevelCreator::SyncGrid() {
@@ -64,6 +79,11 @@ void LevelCreator::Update() {
             SyncGrid();
         }
     }
+    // Обновление кнопок
+    btnInc->Update();
+    btnDec->Update();
+    btnSave->Update();
+    btnBack->Update();
 }
 
 void LevelCreator::PlaceResource(int key) {
@@ -226,28 +246,12 @@ void LevelCreator::DrawUI() const {
     DrawRectangleLinesEx(nameEditRect, 2, nameEditActive ? YELLOW : GRAY);
     DrawText("Map name:", nameEditRect.x, nameEditRect.y - 32, 24, WHITE);
     DrawText(mapName, nameEditRect.x + 8, nameEditRect.y + 8, 28, WHITE);
-    // Кнопки +/-
-    DrawRectangleRec(btnIncRect, Fade(WHITE, 0.18f));
-    DrawRectangleLinesEx(btnIncRect, 2, WHITE);
-    DrawText("+", btnIncRect.x + 36, btnIncRect.y + 4, 32, WHITE);
-    DrawRectangleRec(btnDecRect, Fade(WHITE, 0.18f));
-    DrawRectangleLinesEx(btnDecRect, 2, WHITE);
-    DrawText("-", btnDecRect.x + 36, btnDecRect.y + 4, 32, WHITE);
-    DrawText(TextFormat("Size: %dx%d", cols, rows), btnIncRect.x, btnIncRect.y - 32, 24, WHITE);
-    // Кнопка Save
-    Vector2 mouse = GetMousePosition();
-    bool hovered = CheckCollisionPointRec(mouse, btnSaveRect);
-    DrawRectangleRec(btnSaveRect, Fade(WHITE, 0.18f));
-    DrawRectangleLinesEx(btnSaveRect, 2, hovered ? WHITE : GRAY);
-    int tw = MeasureText("Save", 32);
-    DrawText("Save", btnSaveRect.x + (btnSaveRect.width-tw)/2, btnSaveRect.y + 8, 32, WHITE);
-    // Кнопка Back справа от Save
-    Rectangle btnBackRect = {btnSaveRect.x + btnSaveRect.width + 20, btnSaveRect.y, 140, btnSaveRect.height};
-    bool backHovered = CheckCollisionPointRec(mouse, btnBackRect);
-    DrawRectangleRec(btnBackRect, Fade(WHITE, 0.18f));
-    DrawRectangleLinesEx(btnBackRect, 2, backHovered ? WHITE : GRAY);
-    int twb = MeasureText("Back", 32);
-    DrawText("Back", btnBackRect.x + (btnBackRect.width-twb)/2, btnBackRect.y + 8, 32, WHITE);
+    // Кнопки +/-/Save/Back
+    btnInc->Draw();
+    btnDec->Draw();
+    btnSave->Draw();
+    btnBack->Draw();
+    DrawText(TextFormat("Size: %dx%d", cols, rows), 480, 110, 24, WHITE);
 }
 
 void LevelCreator::HandleUI() {
@@ -257,24 +261,6 @@ void LevelCreator::HandleUI() {
             nameEditActive = true;
         } else {
             nameEditActive = false;
-        }
-        if (CheckCollisionPointRec(mouse, btnIncRect)) {
-            ResizeGrid(std::min(20, cols + 1));
-        }
-        if (CheckCollisionPointRec(mouse, btnDecRect)) {
-            ResizeGrid(std::max(5, cols - 1));
-        }
-        if (CheckCollisionPointRec(mouse, btnSaveRect)) {
-            // Сохраняем карту
-            std::filesystem::create_directory("maps");
-            std::string fname = std::string("maps/") + (mapName[0] ? mapName : "unnamed") + ".lvl";
-            SaveToFile(fname.c_str());
-        }
-        // Back button справа от Save
-        Rectangle btnBackRect = {btnSaveRect.x + btnSaveRect.width + 20, btnSaveRect.y, 140, btnSaveRect.height};
-        if (CheckCollisionPointRec(mouse, btnBackRect)) {
-            extern bool g_EditorBackToMenu;
-            g_EditorBackToMenu = true;
         }
     }
     if (nameEditActive) {
@@ -313,13 +299,13 @@ bool LevelCreator::SaveToFile(const char* filename) const {
 }
 
 void LevelCreator::ResizeGrid(int newSize) {
-    if (newSize == cols) return;
-    cols = rows = newSize;
-    cellSize = (1024.0f - marginLeft - 250.0f) / cols;
-    mapCells.assign(rows * cols, MapCell());
-    objectTypes.assign(rows * cols, EditorObjectType::None);
+    rows = newSize;
+    cols = newSize;
+    cellSize = (1024.0f - marginLeft - 250.0f) / newSize;
+    mapCells = std::vector<MapCell>(rows * cols);
+    objectTypes = std::vector<EditorObjectType>(rows * cols, EditorObjectType::None);
     grid = Grid(rows, cols, marginLeft, marginTop, cellSize);
+    currentX = 0;
+    currentY = 0;
     SyncGrid();
-    currentX = std::min(currentX, cols-1);
-    currentY = std::min(currentY, rows-1);
 }

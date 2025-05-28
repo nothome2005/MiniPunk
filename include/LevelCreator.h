@@ -7,6 +7,7 @@
 #include <string>
 #include <fstream>
 #include <filesystem>
+#include "button.h"
 
 // Дополнительные типы для редактора
 enum class EditorObjectType {
@@ -46,9 +47,7 @@ private:
     char mapName[32] = "";
     bool nameEditActive = false;
     Rectangle nameEditRect = { 700, 160, 220, 40 };
-    Rectangle btnIncRect = { 700, 220, 100, 40 };
-    Rectangle btnDecRect = { 820, 220, 100, 40 };
-    Rectangle btnSaveRect = { 700, 280, 220, 50 };
+    std::unique_ptr<Button> btnInc, btnDec, btnSave, btnBack;
     void DrawUI() const;
     void HandleUI();
     void ResizeGrid(int newSize);
